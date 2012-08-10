@@ -82,12 +82,30 @@ class CAmchartWidget extends CWidget
 	 * @var array
 	 * AmChart Options
 	 */
-	private $_defaultsAmchartOptions = array(
+	private $_defaultsAmChartOptions = array(
 				'fontFamily'=>'Arial,Helvetica, Sans',
 				'startDuration'=>'1',
 				'dataProvider'=>array(),
 				'categoryField'=> ''
 			);
+	
+	
+	/**
+	 * @var array
+	 * AmPieChart Options
+	 */
+	private $_defaultsAmPieChartOptions = array(
+			'fontFamily'=>'Arial,Helvetica, Sans',
+			'startDuration'=>'1',
+			'dataProvider'=>array(),
+			'sequencedAnimation' => true,
+			'startEffect' => 'elastic',
+			'innerRadius' => '30%',
+			'startDuration' => 2,
+			'labelRadius' => 10,
+			'radius' => '45%',
+			'pullOutRadius' => 1,
+	);
 
 	
 	/**
@@ -202,7 +220,7 @@ class CAmchartWidget extends CWidget
 		if(isset($this->Chart['titleField']))
 			$this->render('visualizePie',
 					array(
-							'chart'=>$this->Chart,//array_merge($this->_defaultsAmchartOptions, $this->Chart),
+							'chart'=>array_merge($this->_defaultsAmPieChartOptions, $this->Chart),
 							'width'=>$this->width,
 							'height'=>$this->height
 					),
@@ -211,7 +229,7 @@ class CAmchartWidget extends CWidget
 		else
 			$this->render('visualizeSerial',
 						array(
-						'chart'=>array_merge($this->_defaultsAmchartOptions, $this->Chart),
+						'chart'=>array_merge($this->_defaultsAmChartOptions, $this->Chart),
 						'graphs'=>$this->Graphs,
 						'categoryAxis'=>array_merge($this->_defaultsCategoryAxisOptions, $this->CategoryAxis),
 						'valueAxis'=>array_merge($this->_defaultsAmGraphOptions, $this->ValueAxis),
