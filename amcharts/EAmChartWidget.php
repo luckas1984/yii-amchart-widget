@@ -27,11 +27,13 @@
  * charts for your web application.
  *
  * For information on istallation and useage please visit the porjects hosting page
- * on google code: http://CHANGE!!!!!!!!
+ * on google code: http://code.google.com/p/yii-amchart-widget/
  */
+Yii::import('application.extensions.amcharts.components.*');
 
-class CAmchartWidget extends CWidget
+class EAmchartWidget extends CWidget
 {	
+	
 	/**
 	 * @var String
 	 * Width of Chart
@@ -49,27 +51,34 @@ class CAmchartWidget extends CWidget
 	 * @var array
 	 * Collection of option to customize the chart
 	 */
-	public $Chart = array();
+	public $chart = array();
+	
+	
+	/**
+	 * @var string
+	 * Type of Chart: AmSerialChart, AmPieChart, AmXYChart, AmRadarChart
+	 */
+	public $chartType = "AmSerialChart";
 	
 	
 	/**
 	 * @var array
 	 * Collection of Charts that will be displayed on Chart
 	 */
-	public $Graphs = array();
+	public $graphs = array();
 	
 	
 	/**
 	 * @var array
 	 * Collection of option to customize the Cateogry Axis
 	 */
-	public $CategoryAxis = array();
+	public $categoryAxis = array();
 	
 	/**
 	 * @var array
 	 * Collection of option to customize the Value Axis
 	 */
-	public $ValueAxis = array();
+	public $valueAxis = array();
 	
 	/**
 	* @var array 
@@ -80,9 +89,9 @@ class CAmchartWidget extends CWidget
 	
 	/**
 	 * @var array
-	 * AmChart Options
+	 * Default AmSerialChart Options
 	 */
-	private $_defaultsAmChartOptions = array(
+	private $_defaultsAmSerialChartOptions = array(
 				'fontFamily'=>'Arial,Helvetica, Sans',
 				'startDuration'=>'1',
 				'dataProvider'=>array(),
@@ -92,7 +101,20 @@ class CAmchartWidget extends CWidget
 	
 	/**
 	 * @var array
-	 * AmPieChart Options
+	 * Default AmXYChart Options
+	 */
+	private $_defaultsAmXYChartOptions = array(
+			//'pathToImages' => Yii::app()->getAssetManager()->publish(dirname(__FILE__))."/assets/images/",
+			'panEventsEnabled' => true,
+			'marginRight' => 0,
+			'marginTop' => 0,
+			'startDuration' => 1
+	);
+	
+	
+	/**
+	 * @var array
+	 * Default AmPieChart Options
 	 */
 	private $_defaultsAmPieChartOptions = array(
 			'fontFamily'=>'Arial,Helvetica, Sans',
@@ -124,29 +146,6 @@ class CAmchartWidget extends CWidget
 	);
 	
 	
-	/**
-	 * @var array
-	 * CategoryAxis Options
-	 */
-	private $_defaultsCategoryAxisOptions = array(
-			'title'=>'',
-			'gridPosition'=>'start',
-			'axisAlpha'=>0,
-			'dashLength'=>1
-	);
-	
-	
-	/**
-	 * @var array
-	 * ValueAxis Options
-	 */
-	private $_defaultsValueAxisOptions = array(
-			'title'=>'',
-			'axisAlpha'=>0,
-			'dashLength'=>1
-	);
-	
-	
     /**
      * @var int
      */
@@ -160,12 +159,12 @@ class CAmchartWidget extends CWidget
 	{
         
 		// ensure valid chart type selected
-		foreach ($this->Graphs as $graph)
+		foreach ($this->graphs as $graph)
 			if(!in_array($graph['type'], $this->_validChartTypes))
 				throw new CException($graph['type'] . ' is an invalid chart type. Valid charts are ' . implode(',',$this->_validChartTypes));
 		
 		// check dataProvider is present
-		if(empty($this->Chart['dataProvider']))
+		if(empty($this->chart['dataProvider']))
 			throw new CException('Please provide some dataProvider to render a display');
 		
 		$this->_registerWidgetScripts();
@@ -203,41 +202,47 @@ class CAmchartWidget extends CWidget
 	public function run()
 	{	
 		$newArray = array();
-		foreach ($this->Chart['dataProvider'] as $modelData)
+		foreach ($this->chart['dataProvider'] as $modelData)
 			$newArray[] = $modelData->attributes;
 		
 			
 		//foreach ($this->Graphs as $graph)
 			//$graph['valueField'] = md5($graph['valueField']);
 		
-		$this->Chart['dataProvider'] = json_encode($newArray);
+		$this->chart['dataProvider'] = json_encode($newArray);
 		
 		
-		foreach ($this->Graphs as &$graph)
+		foreach ($this->graphs as &$graph)
 			$graph = array_merge($this->_defaultsAmGraphOptions, $graph);
-			
+
 		
-		if(isset($this->Chart['titleField']))
-			$this->render('visualizePie',
-					array(
-							'chart'=>array_merge($this->_defaultsAmPieChartOptions, $this->Chart),
-							'width'=>$this->width,
-							'height'=>$this->height
-					),
-					false
-			);
-		else
-			$this->render('visualizeSerial',
-						array(
-						'chart'=>array_merge($this->_defaultsAmChartOptions, $this->Chart),
-						'graphs'=>$this->Graphs,
-						'categoryAxis'=>array_merge($this->_defaultsCategoryAxisOptions, $this->CategoryAxis),
-						'valueAxis'=>array_merge($this->_defaultsAmGraphOptions, $this->ValueAxis),
-						'width'=>$this->width,
-						'height'=>$this->height
-						),
-						false
-					);
+		switch ($this->chartType)
+		{
+			case  AmChartTypes::AmPieChart :
+							$this->render('visualizeSerial',
+								array(
+									'chart'=>array_merge($this->_defaultsAmPieChartOptions, $this->chart),
+									'chartType'=>$this->chartType,
+									'width'=>$this->width,
+									'height'=>$this->height
+								),
+								false
+							);
+							break;
+			default:// AmChartTypes::AmSerialChart:
+							$this->render('visualizeSerial',
+								array(
+									'chart'=>array_merge($this->_defaultsAmSerialChartOptions, $this->chart),
+									'chartType'=>$this->chartType,
+									'graphs'=>$this->graphs,
+									'categoryAxis'=>$this->categoryAxis,
+									'valueAxis'=>$this->valueAxis,
+									'width'=>$this->width,
+									'height'=>$this->height
+								),
+								false
+							);
+		}
 	}
 	
 }
