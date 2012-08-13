@@ -2,14 +2,11 @@
 
 	<?php  
 		/* We will use timestamp to allow multiple instance of widget*/
-		$currentTimestamp =  time() + 2; 
+		$currentTimestamp =  time() + rand(); // rand() is a hack to enable multiple chart instance
 	?>
 
-	var chart<?php echo $currentTimestamp; ?>;
-
-	//var chartData<?php //echo $currentTimestamp; ?> = <?php //echo json_encode($data); /*We serialize the user data to fill data chart*/?>;
-
-            AmCharts.ready(function () {
+			var chart<?php echo $currentTimestamp; ?>;
+			AmCharts.ready(function () {
                 // PIE CHART
                 chart<?php echo $currentTimestamp; ?> = new AmCharts.AmPieChart();
                 <?php
