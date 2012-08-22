@@ -21,6 +21,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *
+ * The minimal code needed to use EAmchartWidget is as follows:
+ *
+ * <pre>
+ * <?php
+ * //CONTROLLER
+ * 
+ * //*Using a CActiveDataProvider
+ * 
+ * //$dataProvider = new CActiveDataProvider('ChartData');
+ * 
+ * 
+ * //*Using a CArrayDataProvider
+ * 
+ * 
+ * //SQL Query
+ * 		
+ * 		$oDbConnection = Yii::app()->db; // Getting database connection (config/main.php has to set up database
+ * 		// Here you will use your complex sql query using a string or other yii ways to create your query
+ * 		$oCommand = $oDbConnection->createCommand('SELECT * FROM chart_data');
+ * 		
+ * 		$oCDbDataReader = $oCommand->queryAll(); // Run query and get all results in a CDbDataReader
+ * 
+ * // Set DataProvider
+ * 		$dataProvider=new CArrayDataProvider($oCDbDataReader, array(
+ * 				'keyField' => 'ID'
+ * 		));
+ * 
+ * $this->render('AmChart',array('dataProvider'=>$dataProvider));
+ * 
+ * 
+ * //VIEW
+ * 
+ * $this->widget('ext.amcharts.EAmChartWidget', 
+ * 					array(
+ * 						'width' => 700,
+ * 						'height' => 400,
+ * 						'chart'=>array(
+ * 									'dataProvider'=>$dataProvider,
+ * 									'categoryField' => 'time'
+ * 									),
+ * 						'chartType' => "AmSerialChart",
+ * 						'graphs'=>array(
+ * 									array(
+ * 										'valueField' => 'data',
+ * 										'title'=>'Data graph',
+ * 										'type' => 'column'
+ * 									)),
+ * 						'categoryAxis'=>array(
+ * 									'title'=>'Time'
+ * 									),
+ * 						'valueAxis'=>array(
+ * 									'title'=>'Data')
+ * 	));
+ * </pre>
+ *
  *
  * This widget for use with the Yii Framework utilises the Amchart plugin visualize
  * (http://www.amcharts.com/) to render graphs and
@@ -202,8 +257,18 @@ class EAmchartWidget extends CWidget
 	public function run()
 	{	
 		$newArray = array();
-		foreach ($this->chart['dataProvider'] as $modelData)
-			$newArray[] = $modelData->attributes;
+		
+		if($this->chart['dataProvider'] instanceof CActiveDataProvider)
+		{
+			$this->chart['dataProvider'] = $this->chart['dataProvider']->getData();
+			
+			foreach ($this->chart['dataProvider'] as $modelData)
+				$newArray[] = $modelData->attributes;
+		}
+		else if($this->chart['dataProvider'] instanceof IDataProvider)
+		{
+			$newArray=$this->chart['dataProvider']->getData();
+		}
 		
 			
 		//foreach ($this->Graphs as $graph)
